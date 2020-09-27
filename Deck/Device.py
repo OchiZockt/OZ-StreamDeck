@@ -7,6 +7,8 @@ from StreamDeck.ImageHelpers import PILHelper
 from Deck.Array import Array
 from Deck.Button import Button
 
+from Messages.Common import *
+
 class Device:
     def __init__(self, manager, deck):
         self._manager = manager
@@ -147,10 +149,11 @@ class Device:
                         deck_image = PILHelper.to_native_format(self._deck, image)
                         self._deck.set_key_image(r * self._cols + c, deck_image)
 
-    def recv_from_backend(self, msg):
-        if self._root:
-            self._root.recv_from_backend(msg)
-            self.check_refresh()
-    
-    def recv_from_frontend(self, msg):
-        self._manager.recv_from_frontend(msg)
+    def route(self, target, msg):
+        if target == FRONTEND:
+            if self._root:
+                self._root.route(target, msg)
+                self.check_refresh()
+        
+        elif target == BACKEND:
+            self._manager.route(target, msg)

@@ -1,4 +1,5 @@
 from Deck.Item import Item
+from Messages.Common import *
 
 class Module(Item):
     def __init__(self, fg_color = None, bg_color = None):
@@ -50,20 +51,25 @@ class Module(Item):
         for _, b in self._buttons.items():
             b.tick()
     
+    def recv(self, msg):
+        pass
+    
     def stop(self):
         for m in self._modules:
             m.module.stop()
         for _, b in self._buttons.items():
             b.stop()
     
-    def recv_from_backend(self, msg):
-        for m in self._modules:
-            m.module.recv_from_backend(msg)
-        for _, b in self._buttons.items():
-            b.recv(msg)
-    
-    def recv_from_frontend(self, msg):
-        self._device.recv_from_frontend(msg)
+    def route(self, target, msg):
+        if target == BACKEND:
+            self._device.recv_from_frontend(msg)
+        
+        elif target == FRONTEND:
+            self.recv(msg)
+            for _, b in self._buttons.items():
+                b.recv(msg)
+            for m in self._modules:
+                m.module.route(target, msg)
 
 class SubModule:
     def __init__(self, module, drow, dcol):

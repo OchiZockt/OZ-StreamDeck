@@ -10,3 +10,6 @@ class StartStopCommand(OBSMessage):
         self.obs_kind = obs_kind
         self.ctl_kind = ctl_kind
         self.running = running
+
+class SplitCommand(OBSMessage):
+    pass

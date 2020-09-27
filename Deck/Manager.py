@@ -7,9 +7,7 @@ from StreamDeck import DeviceManager
 
 from Deck.Device import Device
 from Deck.Backend import Backend
-
-FROM_BACKEND = 1
-FROM_FRONTEND = 2
+from Messages.Common import *
 
 class Manager:
     def __init__(self):
@@ -84,24 +82,21 @@ class Manager:
             if self._stop:
                 break
             try:
-                kind, msg = self._msg_queue.get(timeout = 0.5)
+                target, msg = self._msg_queue.get(timeout = 0.5)
                 msg_queue_debug("Getting lock for message processing...")
                 with self._lock:
                     try:
                         msg_queue_debug("Processing message " + str(msg))
-                        if kind == FROM_BACKEND:
+                        if target == FRONTEND:
                             for d in self._devices:
-                                d.recv_from_backend(msg)
-                        elif kind == FROM_FRONTEND:
-                            self._backend.recv_from_frontend(msg)
+                                d.route(target, msg)
+                        elif target == BACKEND:
+                            self._backend.route(target, msg)
                     except Exception as e:
                         print("Exception while processing message:\n\n" + str(e) + "\n")
             except:
                 pass
         print("Message queue stopped.")
 
-    def recv_from_backend(self, msg):
-        self._msg_queue.put((FROM_BACKEND, msg))
-
-    def recv_from_frontend(self, msg):
-        self._msg_queue.put((FROM_FRONTEND, msg))
+    def route(self, target, msg):
+        self._msg_queue.put((target, msg))

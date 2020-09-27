@@ -1,6 +1,8 @@
 from Deck.Module import Module
 from Deck.Button import Button
 
+from Messages.OBS import *
+
 class MarkerControls(Module):
     def __init__(self, timestamp_manager):
         super().__init__()
@@ -20,3 +22,4 @@ class MarkerButton(Button):
 
     def pressed(self):
         self._timestamp_manager.mark_all(self._display_name)
+        self.send_to_frontend(SplitCommand())

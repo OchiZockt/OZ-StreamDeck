@@ -1,3 +1,4 @@
+from Deck.Connector import Connector
 from Messages.Audio import *
 
 import asyncio
@@ -7,9 +8,10 @@ from pythonosc.udp_client import SimpleUDPClient
 from pythonosc.dispatcher import Dispatcher
 from pythonosc.osc_server import BlockingOSCUDPServer
 
-class OSCConnector:
+class OSCConnector(Connector):
     def __init__(self, backend, host, port):
-        self._backend = backend
+        super().__init__(backend)
+        
         self.client = SimpleUDPClient(host, port)
         
         self._osc_server_lock = threading.Lock()
@@ -20,9 +22,6 @@ class OSCConnector:
         self._osc_server = BlockingOSCUDPServer(("127.0.0.1", 8001), dispatcher)
         self._osc_server_thread = threading.Thread(target = self._osc_server.serve_forever)
         self._osc_server_thread.start()
-    
-    def send(self, msg):
-        self._backend.recv_from_backend(msg)
     
     def recv(self, msg):
         if not isinstance(msg, AudioMessage):
@@ -49,7 +48,7 @@ class OSCConnector:
         with self._osc_server_lock:
             try:
                 track_number = int(address.split("/")[2])
-                self.send(VolumeMessage(track_number, float(args[0][:-2])))
+                self.send_to_frontend(VolumeMessage(track_number, float(args[0][:-2])))
             except:
                 pass
     
@@ -57,7 +56,7 @@ class OSCConnector:
         with self._osc_server_lock:
             try:
                 track_number = int(address.split("/")[2])
-                self.send(MuteMessage(track_number, bool(args[0])))
+                self.send_to_frontend(MuteMessage(track_number, bool(args[0])))
             except:
                 pass
     

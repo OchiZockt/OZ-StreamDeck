@@ -26,6 +26,10 @@ class TS:
         self._filename = filename
         self._file = None
     
+    def reset(self):
+        if self._timestamp is not None:
+            self._timestamp.reset()
+    
     def running(self):
         return self._running
     

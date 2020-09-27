@@ -1,6 +1,7 @@
 from PIL import Image, ImageDraw, ImageFont
 
 from Deck.Item import Item
+from Messages.Common import *
 
 class Button(Item):
     def __init__(self, text = "", fg_color = None, bg_color = None, font_size = 16):
@@ -51,5 +52,8 @@ class Button(Item):
     def recv(self, msg):
         pass
     
-    def send(self, msg):
-        self._device.recv_from_frontend(msg)
+    def send_to_frontend(self, msg):
+        self._device.route(FRONTEND, msg)
+
+    def send_to_backend(self, msg):
+        self._device.route(BACKEND, msg)

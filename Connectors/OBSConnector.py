@@ -1,18 +1,17 @@
+from Deck.Connector import Connector
 from Messages.OBS import *
 
 import obswebsocket, obswebsocket.requests, obswebsocket.events, obswebsocket.exceptions
 
-class OBSConnector:
+class OBSConnector(Connector):
     def __init__(self, backend, obs_kind, ip, port):
-        self._backend = backend
+        super().__init__(backend)
+        
         self.obs_kind = obs_kind
         self.obs = None
         self.ip = ip
         self.port = port
         self.ensure_connection()
-    
-    def send(self, msg):
-        self._backend.recv_from_backend(msg)
     
     def recv(self, msg):
         if not isinstance(msg, OBSMessage):

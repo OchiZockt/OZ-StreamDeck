@@ -24,6 +24,9 @@ class TimestampButton(Button):
         self._ts = timestamp_manager.get(self._display_name)
         self._obs_kind = obs_kind
         self._ctl_kind = ctl_kind
+        
+        if self._display_name == "Episode":
+            self._ts.set_running(True)
     
     def text(self):
         return self._display_name + "\n" + self._ts.for_display()
@@ -34,13 +37,18 @@ class TimestampButton(Button):
         
         self._ts.toggle_running()
         if self._obs_kind == RECORD and self._ctl_kind == RECORD:
-            self.send(StartStopCommand("record", "record", self._ts.running()))
+            self.send_to_backend(StartStopCommand("record", "record", self._ts.running()))
         elif self._obs_kind == STREAM and self._ctl_kind == RECORD:
-            self.send(StartStopCommand("stream", "record", self._ts.running()))
+            self.send_to_backend(StartStopCommand("stream", "record", self._ts.running()))
         elif self._obs_kind == STREAM and self._ctl_kind == STREAM:
-            self.send(StartStopCommand("stream", "stream", self._ts.running()))
+            self.send_to_backend(StartStopCommand("stream", "stream", self._ts.running()))
         
         self.request_refresh()
+
+    def recv(self, msg):
+        if isinstance(msg, SplitCommand) and self._display_name == "Episode":
+            self._ts.reset()
+            self.request_refresh()
 
     def tick(self):
         if self._ts.running():

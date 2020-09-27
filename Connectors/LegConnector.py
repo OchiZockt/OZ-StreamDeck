@@ -1,19 +1,18 @@
+from Deck.Connector import Connector
 from Messages.FaceLights import *
 
 from leglight import LegLight
 
-class LegConnector:
+class LegConnector(Connector):
     def __init__(self, backend, side, ip):
-        self._backend = backend
+        super().__init__(backend)
+        
         self._side = side
         try:
             self.leglight = LegLight(ip, 9123)
             print(self.leglight)
         except:
             print(f"LegLight connection to {ip} failed.")
-    
-    def send(self, msg):
-        self._backend.recv_from_backend(msg)
     
     def recv(self, msg):
         if not isinstance(msg, FaceLightsMessage):

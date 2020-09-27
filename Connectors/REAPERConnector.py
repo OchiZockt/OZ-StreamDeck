@@ -1,16 +1,13 @@
+from Deck.Connector import Connector
+
 import requests
 
-class REAPERConnector:
+class REAPERConnector(Connector):
     def __init__(self, backend, host, port):
-        self._backend = backend
+        super().__init__(backend)
+        
         self._host = host
         self._port = port
-    
-    def send(self, msg):
-        self._backend.recv_from_backend(msg)
-    
-    def recv(self, msg):
-        pass
     
     def get_volume(self, track):
         try:

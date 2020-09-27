@@ -29,4 +29,4 @@ class SceneSwitchButton(Button):
             self._scene_name = scene_name
     
     def pressed(self):
-        self.send(SwitchSceneCommand(self._scene_name))
+        self.send_to_backend(SwitchSceneCommand(self._scene_name))

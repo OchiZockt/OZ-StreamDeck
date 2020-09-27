@@ -21,7 +21,7 @@ class SetLightPresetButton(Button):
     
     def pressed(self):
         try:
-            self.send(SetPresetCommand(self._config))
+            self.send_to_backend(SetPresetCommand(self._config))
         except PhueException as e:
             print("Phue exception")
 
@@ -36,7 +36,7 @@ class SetLightRandomColorButton(Button):
                 (L1+L2+L3, LightColorPreset(hue = random.random())),
                 (R1+R3+R4, LightColorPreset(hue = random.random()))
             ]
-            self.send(SetPresetCommand(config))
+            self.send_to_backend(SetPresetCommand(config))
         except PhueException as e:
             print("Phue exception")
 

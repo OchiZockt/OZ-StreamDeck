@@ -20,7 +20,7 @@ class FaceLightButton(Button):
         self.rc = rc
     
     def pressed(self):
-        self.send(SetFaceLightCommand(
+        self.send_to_backend(SetFaceLightCommand(
             self.lb > 0, self.lb, self.lc,
             self.rb > 0, self.rb, self.rc
         ))

@@ -1,5 +1,6 @@
 #from pprint import pprint
 
+from Deck.Connector import Connector
 from Messages.RoomLights import *
 
 from phue import Bridge, PhueException
@@ -58,9 +59,10 @@ class LightColorPreset(LightPreset):
         })
         return d
 
-class HueConnector:
+class HueConnector(Connector):
     def __init__(self, backend, ip):
-        self._backend = backend
+        super().__init__(backend)
+        
         self.bridge = Bridge(ip)
         self.bridge.connect()
         
@@ -75,9 +77,6 @@ class HueConnector:
             self.group_indices[data["name"]] = int(idx)
         
         #pprint(api)
-    
-    def send(self, msg):
-        self._backend.recv_from_backend(msg)
     
     def recv(self, msg):
         if not isinstance(msg, RoomLightsMessage):

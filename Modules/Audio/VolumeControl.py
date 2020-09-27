@@ -30,7 +30,7 @@ class VolumeControlButton(Button):
     
     def pressed(self):
         self._control._volume += self._volume_delta
-        self.send(VolumeMessage(self._track_number, self._control._volume))
+        self.send_to_backend(VolumeMessage(self._track_number, self._control._volume))
 
 class VolumeDisplayButton(Button):
     def __init__(self, track_number, volume, bg_color = "#000000"):
@@ -81,7 +81,7 @@ class MuteButton(Button):
             return "#000000"
     
     def pressed(self):
-        self.send(MuteMessage(self._track_number, not self._muted))
+        self.send_to_backend(MuteMessage(self._track_number, not self._muted))
     
     def tick(self):
         # TODO: Only refresh if necessary.
