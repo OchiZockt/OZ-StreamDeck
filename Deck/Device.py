@@ -150,6 +150,7 @@ class Device:
     def recv_from_backend(self, msg):
         if self._root:
             self._root.recv_from_backend(msg)
+            self.check_refresh()
     
     def recv_from_frontend(self, msg):
         self._manager.recv_from_frontend(msg)

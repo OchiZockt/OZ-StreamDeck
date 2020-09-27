@@ -87,12 +87,15 @@ class Manager:
                 kind, msg = self._msg_queue.get(timeout = 0.5)
                 msg_queue_debug("Getting lock for message processing...")
                 with self._lock:
-                    msg_queue_debug("Processing message")
-                    if kind == FROM_BACKEND:
-                        for f in self._devices:
-                            d.recv_from_backend(msg)
-                    elif kind == FROM_FRONTEND:
-                        self._backend.recv_from_frontend(msg)
+                    try:
+                        msg_queue_debug("Processing message " + str(msg))
+                        if kind == FROM_BACKEND:
+                            for d in self._devices:
+                                d.recv_from_backend(msg)
+                        elif kind == FROM_FRONTEND:
+                            self._backend.recv_from_frontend(msg)
+                    except Exception as e:
+                        print("Exception while processing message:\n\n" + str(e) + "\n")
             except:
                 pass
         print("Message queue stopped.")

@@ -10,50 +10,42 @@ class VolumeControl(Module):
         super().__init__()
         
         self._blink_state = False
-        self._volume = 0
-        
-        self.set_button(0, 0, VolumeControlButton(track_number, "+",  1))
-        self.set_button(1, 0, VolumeDisplayButton(track_number))
-        self.set_button(2, 0, VolumeControlButton(track_number, "-", -1))
-        self.set_button(3, 0, MuteButton(track_number, track_name))
-    
-    def osc_volume_callback(self, volume):
         self._volume = volume
-        self.refresh_volume_display()
-    
-    def refresh_volume_display(self):
-        self.button(1, 0).refresh()
+        
+        self.set_button(0, 0, VolumeControlButton(self, track_number, "+",  1))
+        self.set_button(1, 0, VolumeDisplayButton(track_number, volume))
+        self.set_button(2, 0, VolumeControlButton(self, track_number, "-", -1))
+        self.set_button(3, 0, MuteButton(track_number, track_name))
     
     def tick(self):
         self._blink_state = not self._blink_state
         super().tick()
 
 class VolumeControlButton(Button):
-    def __init__(self, track_number, display_name, volume_delta, bg_color = "#000000"):
+    def __init__(self, control, track_number, display_name, volume_delta, bg_color = "#000000"):
         super().__init__(display_name, bg_color = bg_color, font_size = 36)
+        self._control = control
         self._track_number = track_number
         self._volume_delta = volume_delta
     
     def pressed(self):
-        print("Todo: Send set volume command")
+        self._control._volume += self._volume_delta
+        self.send(VolumeMessage(self._track_number, self._control._volume))
 
 class VolumeDisplayButton(Button):
-    def __init__(self, track_number, bg_color = "#000000"):
-        super().__init__("?", bg_color = bg_color, font_size = 20)
+    def __init__(self, track_number, volume, bg_color = "#000000"):
+        super().__init__(str(volume), bg_color = bg_color, font_size = 20)
         self._track_number = track_number
-        self._volume = "?"
-    
-    def osc_volume_callback(self, volume):
         self._volume = volume
+    
+    def recv(self, msg):
+        if isinstance(msg, VolumeMessage):
+            if msg.track == self._track_number:
+                self._volume = msg.volume
+                self.request_refresh()
     
     def text(self):
         return str(self._volume)
-    
-    def tick(self):
-        self.request_refresh()
-    
-    def refresh(self):
-        self.request_refresh()
 
 class MuteButton(Button):
     def __init__(self, track_number, track_name):
@@ -64,8 +56,11 @@ class MuteButton(Button):
         self._blink_state = False
         super().__init__(self._unmuted_name, font_size = 20)
     
-    def osc_mute_callback(self, muted):
-        self._muted = muted
+    def recv(self, msg):
+        if isinstance(msg, MuteMessage):
+            if msg.track == self._track_number:
+                self._muted = msg.muted
+                self.request_refresh()
     
     def text(self):
         if self._muted:
@@ -86,9 +81,7 @@ class MuteButton(Button):
             return "#000000"
     
     def pressed(self):
-        self._muted = not self._muted
-        self.send(SetMuteCommand(self._track_number, self._muted))
-        self.request_refresh()
+        self.send(MuteMessage(self._track_number, not self._muted))
     
     def tick(self):
         # TODO: Only refresh if necessary.

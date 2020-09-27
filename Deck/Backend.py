@@ -29,7 +29,7 @@ class Backend:
         self._leg_r.recv(msg)
     
     def recv_from_backend(self, msg):
-        self.frontend.recv_from_backend(msg)
+        self._frontend.recv_from_backend(msg)
     
     def stop(self):
         self._osc.stop()

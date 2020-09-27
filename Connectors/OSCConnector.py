@@ -11,9 +11,6 @@ class OSCConnector:
     def __init__(self, backend, host, port):
         self._backend = backend
         self.client = SimpleUDPClient(host, port)
-        self.track_volumes = {}
-        self._volume_callbacks = {}
-        self._mute_callbacks = {}
         
         self._osc_server_lock = threading.Lock()
         dispatcher = Dispatcher()
@@ -31,7 +28,10 @@ class OSCConnector:
         if not isinstance(msg, AudioMessage):
             return
         
-        if isinstance(msg, SetMuteCommand):
+        if isinstance(msg, VolumeMessage):
+            self.set_volume(msg.track, msg.volume)
+        
+        if isinstance(msg, MuteMessage):
             self.set_muted(msg.track, msg.muted)
     
     def stop(self):
@@ -41,12 +41,6 @@ class OSCConnector:
         print("Sending refresh request to REAPER...")
         self.client.send_message("/action", 41743)
     
-    def add_volume_callback(self, track_number, callback):
-        self._volume_callbacks[track_number] = callback
-    
-    def add_mute_callback(self, track_number, callback):
-        self._mute_callbacks[track_number] = callback
-    
     def osc_default_handler(self, address, *args):
         print("OSC default handler:", address, args)
     
@@ -55,11 +49,7 @@ class OSCConnector:
         with self._osc_server_lock:
             try:
                 track_number = int(address.split("/")[2])
-                volume = float(args[0][:-2])
-                #self.track_volumes[track_number] = round(volume)
-                callback = self._volume_callbacks.get(track_number)
-                if callback is not None:
-                    callback(volume)
+                self.send(VolumeMessage(track_number, float(args[0][:-2])))
             except:
                 pass
     
@@ -67,16 +57,9 @@ class OSCConnector:
         with self._osc_server_lock:
             try:
                 track_number = int(address.split("/")[2])
-                callback = self._mute_callbacks.get(track_number)
-                if callback is not None:
-                    callback(bool(args[0]))
+                self.send(MuteMessage(track_number, bool(args[0])))
             except:
                 pass
-    
-    def get_volume(self, track_number):
-        with self._osc_server_lock:
-            volume = self.track_volumes.get(track_number, 0.0)
-        return volume
     
     def set_volume(self, track_number, volume):
         self.client.send_message(f"/track/{track_number}/volume/db", volume)
