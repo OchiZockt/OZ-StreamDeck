@@ -9,3 +9,6 @@ class Connector:
 
     def recv(self, msg):
         pass
+    
+    def stop(self):
+        pass

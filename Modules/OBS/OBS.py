@@ -5,6 +5,7 @@ from Modules.OBS.TimestampManager import TimestampManager
 from Modules.OBS.SceneSwitcher import SceneSwitcher
 from Modules.OBS.RecordControls import RecordControls
 from Modules.OBS.MarkerControls import MarkerControls
+from Modules.Music.MusicControls import MusicControls
 
 class OBS(Module):
     def __init__(self):
@@ -12,10 +13,7 @@ class OBS(Module):
         
         self._timestamp_manager = TimestampManager("/tmp")
         
-        self._scene_switcher = SceneSwitcher()
-        self._marker_controls = MarkerControls(self._timestamp_manager)
-        self._record_controls = RecordControls(self._timestamp_manager)
-        
-        self.add_module(0, 0, self._scene_switcher)
-        self.add_module(3, 0, self._marker_controls)
-        self.add_module(0, 4, self._record_controls)
+        self.add_module(0, 0, SceneSwitcher())
+        self.add_module(3, 0, MarkerControls(self._timestamp_manager))
+        self.add_module(3, 3, RecordControls(self._timestamp_manager))
+        self.add_module(0, 4, MusicControls())
