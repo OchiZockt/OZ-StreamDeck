@@ -5,7 +5,7 @@ from Modules.OBS.TimestampManager import TimestampManager
 from Modules.OBS.SceneSwitcher import SceneSwitcher
 from Modules.OBS.RecordControls import RecordControls
 from Modules.OBS.MarkerControls import MarkerControls
-from Modules.Music.MusicControls import MusicControls
+from Modules.Audio.MusicControls import MusicControls
 
 class OBS(Module):
     def __init__(self):
