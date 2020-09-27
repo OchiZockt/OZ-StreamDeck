@@ -8,7 +8,8 @@ from Deck.Array import Array
 from Deck.Button import Button
 
 class Device:
-    def __init__(self, deck):
+    def __init__(self, manager, deck):
+        self._manager = manager
         self._deck = deck
         self._rows = self._deck.KEY_ROWS
         self._cols = self._deck.KEY_COLS
@@ -16,7 +17,6 @@ class Device:
         self._btnh = self._deck.KEY_PIXEL_HEIGHT
         self._root = None
         self._last_key_time = 0
-        self._lock = Lock()
         
         self._deck.open()
         self._deck.reset()
@@ -47,10 +47,14 @@ class Device:
     def stop(self):
         serial_number = self.serial_number()
         print(f"Stopping deck {serial_number}...")
-        with self._lock:
-            self._deck.reset()
-            self._deck.set_brightness(0)
-            self._deck.close()
+        
+        if self._root:
+            self._root.stop()
+        
+        self._deck.reset()
+        self._deck.set_brightness(0)
+        self._deck.close()
+        
         print(f"Stopped deck {serial_number}.")
     
     def serial_number(self):
@@ -75,7 +79,7 @@ class Device:
         if now - self._last_key_time < 0.1:
             return
         
-        with self._lock:
+        with self._manager.lock():
             try:
                 self._last_key_time = now
                 button = self._button_buffer.get(key // self._cols, key % self._cols)
@@ -90,13 +94,12 @@ class Device:
         if self._root is None:
             return
         
-        with self._lock:
-            try:
-                self._root.tick()
-            except Exception as e:
-                print("Unhandled exception in tick: " + str(e))
-            
-            self.check_refresh()
+        try:
+            self._root.tick()
+        except Exception as e:
+            print("Unhandled exception in tick: " + str(e))
+        
+        self.check_refresh()
 
     def check_refresh(self):
         if self._rebuild_layout:
@@ -143,3 +146,10 @@ class Device:
                     if image is not None:
                         deck_image = PILHelper.to_native_format(self._deck, image)
                         self._deck.set_key_image(r * self._cols + c, deck_image)
+
+    def recv_from_backend(self, msg):
+        if self._root:
+            self._root.recv_from_backend(msg)
+    
+    def recv_from_frontend(self, msg):
+        self._manager.recv_from_frontend(msg)

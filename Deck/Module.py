@@ -49,6 +49,21 @@ class Module(Item):
             m.module.tick()
         for _, b in self._buttons.items():
             b.tick()
+    
+    def stop(self):
+        for m in self._modules:
+            m.module.stop()
+        for _, b in self._buttons.items():
+            b.stop()
+    
+    def recv_from_backend(self, msg):
+        for m in self._modules:
+            m.module.recv_from_backend(msg)
+        for _, b in self._buttons.items():
+            b.recv(msg)
+    
+    def recv_from_frontend(self, msg):
+        self._device.recv_from_frontend(msg)
 
 class SubModule:
     def __init__(self, module, drow, dcol):

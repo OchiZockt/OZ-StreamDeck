@@ -1,11 +1,33 @@
+from Messages.OBS import *
+
 import obswebsocket, obswebsocket.requests, obswebsocket.events, obswebsocket.exceptions
 
 class OBSConnector:
-    def __init__(self, ip, port):
+    def __init__(self, backend, obs_kind, ip, port):
+        self._backend = backend
+        self.obs_kind = obs_kind
         self.obs = None
         self.ip = ip
         self.port = port
         self.ensure_connection()
+    
+    def send(self, msg):
+        self._backend.recv_from_backend(msg)
+    
+    def recv(self, msg):
+        if not isinstance(msg, OBSMessage):
+            return
+        
+        if isinstance(msg, SwitchSceneCommand):
+            if self.obs_kind == "stream":
+                self.switch_scene(msg.scene_name)
+        
+        elif isinstance(msg, StartStopCommand):
+            if msg.obs_kind == self.obs_kind:
+                if msg.ctl_kind == "record":
+                    self.set_recording(msg.running)
+                elif msg.ctl_kind == "stream":
+                    self.set_streaming(msg.running)
     
     @staticmethod
     def on_event(message):
@@ -28,6 +50,8 @@ class OBSConnector:
             print("OBS connection failure")
             self.obs = None
             return False
+        except:
+            print("Unhandled exception")
     
     def call(self, request):
         if not self.ensure_connection():

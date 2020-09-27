@@ -1,36 +1,33 @@
 from Deck.Button import Button
 from Deck.Module import Module
 
+from Messages.RoomLights import *
 from Connectors.HueConnector import *
 
 class RoomLights(Module):
     def __init__(self):
         super().__init__()
         
-        self._hue = HueConnector("192.168.0.55")
-        
-        self.set_button(0, 0, SetLightPresetButton("Room\nbright",  self._hue, CONFIG_ROOM_BRIGHT))
-        self.set_button(0, 1, SetLightPresetButton("Backgr\ncolor", self._hue, CONFIG_BG_COLOR))
-        self.set_button(0, 2, SetLightPresetButton("Room\ndimmed",  self._hue, CONFIG_ROOM_DIMMED))
-        self.set_button(1, 0, SetLightPresetButton("Bkgnd\noff",    self._hue, CONFIG_FACE_OFF))
-        self.set_button(1, 1, SetLightPresetButton("Bkgnd\ncolor",  self._hue, CONFIG_FACE_COLOR))
+        self.set_button(0, 0, SetLightPresetButton("Room\nbright",  CONFIG_ROOM_BRIGHT))
+        self.set_button(0, 1, SetLightPresetButton("Backgr\ncolor", CONFIG_BG_COLOR))
+        self.set_button(0, 2, SetLightPresetButton("Room\ndimmed",  CONFIG_ROOM_DIMMED))
+        self.set_button(1, 0, SetLightPresetButton("Bkgnd\noff",    CONFIG_FACE_OFF))
+        self.set_button(1, 1, SetLightPresetButton("Bkgnd\ncolor",  CONFIG_FACE_COLOR))
 
 class SetLightPresetButton(Button):
-    def __init__(self, display_name, hue, config):
+    def __init__(self, display_name, config):
         super().__init__(display_name, bg_color = "#222222")
         self._config = config
-        self._hue = hue
     
     def pressed(self):
         try:
-            self._hue.apply_config(self._config)
+            self.send(SetPresetCommand(self._config))
         except PhueException as e:
             print("Phue exception")
 
 class SetLightRandomColorButton(Button):
-    def __init__(self, display_name, hue):
+    def __init__(self, display_name):
         super().__init__(display_name)
-        self._hue = hue
     
     def pressed(self):
         try:
@@ -39,7 +36,7 @@ class SetLightRandomColorButton(Button):
                 (L1+L2+L3, LightColorPreset(hue = random.random())),
                 (R1+R3+R4, LightColorPreset(hue = random.random()))
             ]
-            self._hue.apply_config(config)
+            self.send(SetPresetCommand(config))
         except PhueException as e:
             print("Phue exception")
 

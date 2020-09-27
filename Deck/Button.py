@@ -44,3 +44,12 @@ class Button(Item):
     
     def tick(self):
         pass
+
+    def stop(self):
+        pass
+    
+    def recv(self, msg):
+        pass
+    
+    def send(self, msg):
+        self._device.recv_from_frontend(msg)
