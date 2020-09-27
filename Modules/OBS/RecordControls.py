@@ -12,9 +12,9 @@ class RecordControls(Module):
         super().__init__()
         
         self.set_button(0, 0, TimestampButton(timestamp_manager, STREAM, STREAM, "Stream"))
-        self.set_button(1, 0, TimestampButton(timestamp_manager, STREAM, RECORD, "StrRec"))
-        self.set_button(2, 0, TimestampButton(timestamp_manager, RECORD, RECORD, "Record"))
-        self.set_button(3, 0, TimestampButton(timestamp_manager, NONE, NONE, "Episode"))
+        self.set_button(0, 1, TimestampButton(timestamp_manager, STREAM, RECORD, "StrRec"))
+        self.set_button(0, 2, TimestampButton(timestamp_manager, RECORD, RECORD, "Record"))
+        self.set_button(0, 3, TimestampButton(timestamp_manager, NONE, NONE, "Episode"))
 
 class TimestampButton(Button):
     def __init__(self, timestamp_manager, obs_kind, ctl_kind, display_name):
