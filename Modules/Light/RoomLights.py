@@ -11,8 +11,6 @@ class RoomLights(Module):
         self.set_button(0, 0, SetLightPresetButton("Room\nbright",  CONFIG_ROOM_BRIGHT))
         self.set_button(0, 1, SetLightPresetButton("Backgr\ncolor", CONFIG_BG_COLOR))
         self.set_button(0, 2, SetLightPresetButton("Room\ndimmed",  CONFIG_ROOM_DIMMED))
-        self.set_button(1, 0, SetLightPresetButton("Bkgnd\noff",    CONFIG_FACE_OFF))
-        self.set_button(1, 1, SetLightPresetButton("Bkgnd\ncolor",  CONFIG_FACE_COLOR))
 
 class SetLightPresetButton(Button):
     def __init__(self, display_name, config):

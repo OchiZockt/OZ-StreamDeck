@@ -4,7 +4,7 @@ from Deck.Item import Item
 from Messages.Common import *
 
 class Button(Item):
-    def __init__(self, text = "", fg_color = None, bg_color = None, font_size = 16):
+    def __init__(self, text = "", fg_color = None, bg_color = None, font_size = 18):
         super().__init__(fg_color, bg_color)
         self._text = text
         self._font_size = font_size

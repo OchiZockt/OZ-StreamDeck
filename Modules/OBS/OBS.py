@@ -11,7 +11,7 @@ class OBS(Module):
     def __init__(self):
         super().__init__()
         
-        self._timestamp_manager = TimestampManager("/tmp")
+        self._timestamp_manager = TimestampManager("/mnt/rec")
         
         self.add_module(0, 0, SceneSwitcher())
         self.add_module(3, 0, MarkerControls(self._timestamp_manager))
