@@ -11,16 +11,6 @@ class Item:
     def set_parent(self, parent):
         self._parent = parent
 
-    def request_refresh(self):
-        if self._device is None:
-            raise Exception("Refresh requested with unset device.")
-        self._device.request_refresh()
-    
-    def request_full_refresh(self):
-        if self._device is None:
-            raise Exception("Full refresh requested with unset device.")
-        self._device.request_full_refresh()
-    
     def request_layout_rebuild(self):
         if self._device is None:
             raise Exception("Layout rebuild requested with unset device.")

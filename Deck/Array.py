@@ -9,8 +9,14 @@ class Array:
         assert col >= 0 and col < self.cols, "Array col out of bounds"
         return row * self.cols + col
     
+    def get_by_index(self, idx):
+        return self.data[idx]
+    
     def get(self, row, col):
         return self.data[self.coord_to_index(row, col)]
+    
+    def set_by_index(self, idx, val):
+        self.data[idx] = val
     
     def set(self, row, col, val):
         self.data[self.coord_to_index(row, col)] = val

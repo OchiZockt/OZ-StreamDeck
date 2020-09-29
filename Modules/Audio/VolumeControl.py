@@ -43,7 +43,7 @@ class VolumeDisplayButton(Button):
         if isinstance(msg, VolumeMessage):
             if msg.track == self._track_number:
                 self._volume = msg.volume
-                self.request_refresh()
+                self.set_dirty()
     
     def text(self):
         return self._track_name + "\n" + str(self._volume)
@@ -61,7 +61,7 @@ class MuteButton(Button):
         if isinstance(msg, MuteMessage):
             if msg.track == self._track_number:
                 self._muted = msg.muted
-                self.request_refresh()
+                self.set_dirty()
     
     def text(self):
         if self._muted:
@@ -84,6 +84,6 @@ class MuteButton(Button):
     def pressed(self):
         self.send_to_backend(MuteMessage(self._track_number, not self._muted))
     
-    def tick(self):
-        # TODO: Only refresh if necessary.
-        self.request_refresh()
+    def dirty(self):
+        # TODO: Only refresh if necessary
+        return True

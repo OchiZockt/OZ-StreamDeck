@@ -42,14 +42,11 @@ class TimestampButton(Button):
             self.send_to_backend(StartStopCommand("stream", "record", self._ts.running()))
         elif self._obs_kind == STREAM and self._ctl_kind == STREAM:
             self.send_to_backend(StartStopCommand("stream", "stream", self._ts.running()))
-        
-        self.request_refresh()
 
     def recv(self, msg):
         if isinstance(msg, SplitCommand) and self._display_name == "Episode":
             self._ts.reset()
-            self.request_refresh()
+            self.set_dirty()
 
-    def tick(self):
-        if self._ts.running():
-            self.request_refresh()
+    def dirty(self):
+        return self._ts.running()

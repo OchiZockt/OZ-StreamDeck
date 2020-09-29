@@ -1,7 +1,7 @@
-from time import time
-from functools import partial
-from threading import Lock
+import time
+import functools
 
+from PIL import Image
 from StreamDeck.ImageHelpers import PILHelper
 
 from Deck.Array import Array
@@ -23,23 +23,15 @@ class Device:
         self._deck.open()
         self._deck.reset()
         self._deck.set_brightness(50)
-        self._deck.set_key_callback(partial(self.key_change_callback))
+        self._deck.set_key_callback(functools.partial(self.key_change_callback))
         
         self._rebuild_layout = True
-        self._refresh_full = True
-        self._refresh = True
         
         print("Started deck " + self.serial_number())
 
     def request_layout_rebuild(self):
         self._rebuild_layout = True
     
-    def request_full_refresh(self):
-        self._full_refresh = True
-    
-    def request_refresh(self):
-        self._refresh = True
-
     def fg_color(self):
         return "#FFFFFF"
     
@@ -77,7 +69,7 @@ class Device:
         if not state:
             return
         
-        now = time()
+        now = time.time()
         if now - self._last_key_time < 0.1:
             return
         
@@ -87,10 +79,11 @@ class Device:
                 button = self._button_buffer.get(key // self._cols, key % self._cols)
                 if button is not None:
                     button.pressed()
+                    button.set_highlight()
             except Exception as e:
                 print("Unhandled exception in key_change_callback: " + str(e))
             
-            self.check_refresh()
+            self.render()
 
     def tick(self):
         if self._root is None:
@@ -101,21 +94,7 @@ class Device:
         except Exception as e:
             print("Unhandled exception in tick: " + str(e))
         
-        self.check_refresh()
-
-    def check_refresh(self):
-        if self._rebuild_layout:
-            self.render(True)
-            self._rebuild_layout = False
-            self._refresh_full = False
-            self._refresh = False
-        elif self._refresh_full:
-            self.render(True)
-            self._refresh_full = False
-            self._refresh = False
-        elif self._refresh:
-            self.render()
-            self._refresh = False
+        self.render()
 
     def update_button_buffer(self):
         self._button_buffer = Array(self._rows, self._cols)
@@ -123,37 +102,48 @@ class Device:
             self._root.update_button_buffer(self._button_buffer)
 
         # Fill unset buttons with dummy buttons.
-        for r in range(0, self._rows):
-            for c in range(0, self._cols):
-                b = self._button_buffer.get(r, c)
-                if b is None:
-                    dummy_button = Button()
-                    dummy_button.set_device(self)
-                    dummy_button.set_parent(self)
-                    self._button_buffer.set(r, c, dummy_button)
+        for i in range(0, self._rows*self._cols):
+            b = self._button_buffer.get_by_index(i)
+            if b is None:
+                dummy_button = Button()
+                dummy_button.set_device(self)
+                dummy_button.set_parent(self)
+                self._button_buffer.set_by_index(i, dummy_button)
         
         self._layout_dirty = False
 
-    def render(self, force = False):
+    def render(self):
+        force = False
         if self._rebuild_layout:
             self.update_button_buffer()
             force = True
             self._rebuild_layout = False
         
-        for r in range(0, self._rows):
-            for c in range(0, self._cols):
-                b = self._button_buffer.get(r, c)
-                if b.dirty() or force:
-                    image = b.render(self._btnw, self._btnh, force)
-                    if image is not None:
-                        deck_image = PILHelper.to_native_format(self._deck, image)
-                        self._deck.set_key_image(r * self._cols + c, deck_image)
+        unhighlight_button = None
+        
+        for i in range(0, self._rows*self._cols):
+            b = self._button_buffer.get_by_index(i)
+            if b.dirty() or force:
+                image = b.render(self._btnw, self._btnh, force)
+                if image is not None:
+                    deck_image = PILHelper.to_native_format(self._deck, image)
+                    self._deck.set_key_image(i, deck_image)
+                    if b.get_and_clear_highlight():
+                        unhighlight_button = i
+        
+        if unhighlight_button is not None:
+            time.sleep(0.1)
+            b = self._button_buffer.get_by_index(unhighlight_button)
+            image = b.render(self._btnw, self._btnh, True)
+            if image is not None:
+                deck_image = PILHelper.to_native_format(self._deck, image)
+                self._deck.set_key_image(unhighlight_button, deck_image)
 
     def route(self, target, msg):
         if target == FRONTEND:
             if self._root:
                 self._root.route(target, msg)
-                self.check_refresh()
+                self.render()
         
         elif target == BACKEND:
             self._manager.route(target, msg)

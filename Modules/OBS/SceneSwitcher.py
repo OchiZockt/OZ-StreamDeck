@@ -57,4 +57,3 @@ class SBSToggleButton(Button):
     
     def pressed(self):
         self._module._sbs = not self._module._sbs
-        self.request_refresh()
