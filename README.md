@@ -14,6 +14,7 @@ I'm using the following supporting libraries:
 ## Overview
 
 * "Deck" contains general-purpose classes encapsulating Stream Deck devices, buttons, groups of buttons, etc.
-* "Connectors" contains vendor-specific helper classes for controlling devices or external software
+* "Connectors" contains vendor-specific backends for controlling devices or external software
 * "Modules" contains user-/project-specific definitions of what should be shown on the Stream Decks and how to handle input
+* "Messages" contains definitions for objects which can be sent between frontend and backend
 * "Utils" contains small utility or helper classes
