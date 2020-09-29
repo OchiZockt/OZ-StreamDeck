@@ -13,7 +13,7 @@ class VolumeControl(Module):
         self._volume = volume
         
         self.set_button(0, 0, VolumeControlButton(self, track_number, "+",  1))
-        self.set_button(1, 0, VolumeDisplayButton(track_number, volume))
+        self.set_button(1, 0, VolumeDisplayButton(track_number, track_name, volume))
         self.set_button(2, 0, VolumeControlButton(self, track_number, "-", -1))
         self.set_button(3, 0, MuteButton(track_number, track_name))
     
@@ -33,9 +33,10 @@ class VolumeControlButton(Button):
         self.send_to_backend(VolumeMessage(self._track_number, self._control._volume))
 
 class VolumeDisplayButton(Button):
-    def __init__(self, track_number, volume, bg_color = "#000000"):
+    def __init__(self, track_number, track_name, volume, bg_color = "#000000"):
         super().__init__(str(volume), bg_color = bg_color, font_size = 20)
         self._track_number = track_number
+        self._track_name = track_name
         self._volume = volume
     
     def recv(self, msg):
@@ -45,7 +46,7 @@ class VolumeDisplayButton(Button):
                 self.request_refresh()
     
     def text(self):
-        return str(self._volume)
+        return self._track_name + "\n" + str(self._volume)
 
 class MuteButton(Button):
     def __init__(self, track_number, track_name):
