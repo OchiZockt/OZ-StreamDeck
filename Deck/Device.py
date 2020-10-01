@@ -139,6 +139,7 @@ class Device:
         if self._highlight_button is not None:
             time.sleep(0.1)
             self._render_button(self._highlight_button, True)
+            self._highlight_button = None
 
     def route(self, target, msg):
         if target == FRONTEND:
