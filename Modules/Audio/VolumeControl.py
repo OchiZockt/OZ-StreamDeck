@@ -15,7 +15,6 @@ class VolumeControl(Module):
         self.set_button(0, 0, VolumeControlButton(self, track_number, "+",  1))
         self.set_button(1, 0, VolumeDisplayButton(track_number, track_name, volume))
         self.set_button(2, 0, VolumeControlButton(self, track_number, "-", -1))
-        self.set_button(3, 0, MuteButton(track_number, track_name))
     
     def tick(self):
         self._blink_state = not self._blink_state
@@ -38,36 +37,23 @@ class VolumeDisplayButton(Button):
         self._track_number = track_number
         self._track_name = track_name
         self._volume = volume
+        self._muted = False
+    
+    def pressed(self):
+        self.send_to_backend(MuteMessage(self._track_number, not self._muted))
     
     def recv(self, msg):
         if isinstance(msg, VolumeMessage):
             if msg.track == self._track_number:
                 self._volume = msg.volume
                 self.set_dirty()
-    
-    def text(self):
-        return self._track_name + "\n" + str(self._volume)
-
-class MuteButton(Button):
-    def __init__(self, track_number, track_name):
-        self._unmuted_name = "Mute\n" + track_name
-        self._muted_name = track_name + "\nmuted"
-        self._muted = False
-        self._track_number = track_number
-        self._blink_state = False
-        super().__init__(self._unmuted_name, font_size = 20)
-    
-    def recv(self, msg):
-        if isinstance(msg, MuteMessage):
+        elif isinstance(msg, MuteMessage):
             if msg.track == self._track_number:
                 self._muted = msg.muted
                 self.set_dirty()
     
     def text(self):
-        if self._muted:
-            return self._muted_name
-        else:
-            return self._unmuted_name
+        return self._track_name + "\n" + ("Muted" if self._muted else str(self._volume))
     
     def fg_color(self):
         if self._muted:
@@ -81,9 +67,6 @@ class MuteButton(Button):
         else:
             return "#000000"
     
-    def pressed(self):
-        self.send_to_backend(MuteMessage(self._track_number, not self._muted))
-    
     def dirty(self):
-        # TODO: Only refresh if necessary
+        # TODO: Only refresh if necessary.
         return True
