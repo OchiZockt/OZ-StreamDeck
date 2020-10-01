@@ -25,6 +25,10 @@ class Device:
         self._deck.set_brightness(50)
         self._deck.set_key_callback(functools.partial(self.key_change_callback))
         
+        highlight_image = Image.new("RGB", (self._btnw, self._btnh), "white")
+        self._highlight_image = PILHelper.to_native_format(self._deck, highlight_image)
+        self._highlight_button = None
+        
         self._rebuild_layout = True
         
         print("Started deck " + self.serial_number())
@@ -78,8 +82,9 @@ class Device:
                 self._last_key_time = now
                 button = self._button_buffer.get(key // self._cols, key % self._cols)
                 if button is not None:
+                    self._deck.set_key_image(key, self._highlight_image)
+                    self._highlight_button = key
                     button.pressed()
-                    button.set_highlight()
             except Exception as e:
                 print("Unhandled exception in key_change_callback: " + str(e))
             
@@ -112,6 +117,13 @@ class Device:
         
         self._layout_dirty = False
 
+    def _render_button(self, i, force):
+        b = self._button_buffer.get_by_index(i)
+        image = b.render(self._btnw, self._btnh, force)
+        if image is not None:
+            deck_image = PILHelper.to_native_format(self._deck, image)
+            self._deck.set_key_image(i, deck_image)
+
     def render(self):
         force = False
         if self._rebuild_layout:
@@ -119,25 +131,14 @@ class Device:
             force = True
             self._rebuild_layout = False
         
-        unhighlight_button = None
-        
         for i in range(0, self._rows*self._cols):
-            b = self._button_buffer.get_by_index(i)
-            if b.dirty() or force:
-                image = b.render(self._btnw, self._btnh, force)
-                if image is not None:
-                    deck_image = PILHelper.to_native_format(self._deck, image)
-                    self._deck.set_key_image(i, deck_image)
-                    if b.get_and_clear_highlight():
-                        unhighlight_button = i
+            if i == self._highlight_button:
+                continue
+            self._render_button(i, force)
         
-        if unhighlight_button is not None:
+        if self._highlight_button is not None:
             time.sleep(0.1)
-            b = self._button_buffer.get_by_index(unhighlight_button)
-            image = b.render(self._btnw, self._btnh, True)
-            if image is not None:
-                deck_image = PILHelper.to_native_format(self._deck, image)
-                self._deck.set_key_image(unhighlight_button, deck_image)
+            self._render_button(self._highlight_button, True)
 
     def route(self, target, msg):
         if target == FRONTEND:
