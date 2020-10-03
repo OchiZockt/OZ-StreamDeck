@@ -6,6 +6,7 @@ from Modules.LightControls import LightControls
 from Modules.RecordControls import RecordControls
 from Modules.MarkerControls import MarkerControls
 from Modules.VolumeControls import VolumeControls
+from Modules.DiscordControls import DiscordControls
 
 from Utils.TimestampManager import TimestampManager
 
@@ -21,3 +22,4 @@ class Primary(Module):
         self.add_module(0, 3, RecordControls(self._timestamp_manager))
         self.add_module(3, 0, MarkerControls(self._timestamp_manager))
         self.add_module(1, 6, VolumeControls())
+        self.add_module(0, 6, DiscordControls())
