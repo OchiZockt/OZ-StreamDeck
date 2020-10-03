@@ -36,7 +36,7 @@ class Module(Item):
             return
         
         # Update submodules recursively first.
-        for m in self._modules:
+        for m in reversed(self._modules):
             m.module.update_button_buffer(button_buffer.view(m.drow, m.dcol))
         
         # Now insert our buttons.
