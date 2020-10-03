@@ -4,10 +4,12 @@ from Deck.Item import Item
 from Messages.Common import *
 
 class Button(Item):
-    def __init__(self, text = "", fg_color = None, bg_color = None, font_size = 18):
+    def __init__(self, text = "", fg_color = None, bg_color = None, font_size = 18, border_size = 0, border_color = "white"):
         super().__init__(fg_color, bg_color)
         self._text = text
         self._font_size = font_size
+        self._border_size = border_size
+        self._border_color = border_color
         self._dirty = True
 
     def dirty(self):
@@ -18,6 +20,12 @@ class Button(Item):
 
     def text(self):
         return self._text
+    
+    def border_size(self):
+        return self._border_size
+    
+    def border_color(self):
+        return self._border_color
 
     def render(self, width, height, force):
         if not self.dirty() and not force:
@@ -33,7 +41,10 @@ class Button(Item):
         text = self.text()
         label_w, label_h = draw.textsize(text, font = font)
         label_pos = ((width - label_w) // 2, (height // 2) - (label_h // 2))
-        draw.text(label_pos, text = text, fill = self.fg_color(), font = font)
+        draw.text(label_pos, text = text, fill = self.fg_color(), font = font, align = "center")
+        
+        if self.border_size() > 0:
+            draw.rectangle([(0, 0), (width-1, height-1)], outline = self.border_color(), width = self.border_size())
         
         self._dirty = False
         

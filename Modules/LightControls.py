@@ -1,42 +1,41 @@
-from Deck.Button import Button
 from Deck.Module import Module
+from Deck.Button import Button
 
+from Messages.FaceLights import *
 from Messages.RoomLights import *
 from Connectors.HueConnector import *
 
-class RoomLights(Module):
+class LightControls(Module):
     def __init__(self):
-        super().__init__()
+        super().__init__(bg_color = "#001e42")
         
-        self.set_button(0, 0, SetLightPresetButton("Room\nbright",  CONFIG_ROOM_BRIGHT))
-        self.set_button(0, 1, SetLightPresetButton("Backgr\ncolor", CONFIG_BG_COLOR))
-        self.set_button(0, 2, SetLightPresetButton("Room\ndimmed",  CONFIG_ROOM_DIMMED))
-
-class SetLightPresetButton(Button):
-    def __init__(self, display_name, config):
-        super().__init__(display_name, bg_color = "#222222")
-        self._config = config
+        self.set_button(0, 0, LightButton("Light\nColor",   3, 6, 3200, 3200, CONFIG_BG_COLOR))
+        self.set_button(0, 1, LightButton("Light\nDimmed",  3, 6, 3200, 3200, CONFIG_ROOM_DIMMED))
+        self.set_button(1, 0, LightButton("Light\nEnd",     0, 0, 3200, 3200, CONFIG_BG_COLOR))
+        self.set_button(1, 1, LightButton("Light\nNormal",  0, 0, 3200, 3200, CONFIG_ROOM_BRIGHT))
+        
+class LightButton(Button):
+    def __init__(self, text, face_lb, face_rb, face_lc, face_rc, room_config):
+        super().__init__(text = text)
+        
+        self._face_lb = face_lb
+        self._face_rb = face_rb
+        self._face_lc = face_lc
+        self._face_rc = face_rc
+        self._room_config = room_config
     
     def pressed(self):
         try:
-            self.send_to_backend(SetPresetCommand(self._config))
+            self.send_to_backend(SetPresetCommand(self._room_config))
         except PhueException as e:
             print("Phue exception")
+        
+        self.send_to_backend(SetFaceLightCommand(
+            self._face_lb > 0, self._face_lb, self._face_lc,
+            self._face_rb > 0, self._face_rb, self._face_rc
+        ))
 
-class SetLightRandomColorButton(Button):
-    def __init__(self, display_name):
-        super().__init__(display_name)
-    
-    def pressed(self):
-        try:
-            config = [
-                (L4+R2, LightOffPreset()),
-                (L1+L2+L3, LightColorPreset(hue = random.random())),
-                (R1+R3+R4, LightColorPreset(hue = random.random()))
-            ]
-            self.send_to_backend(SetPresetCommand(config))
-        except PhueException as e:
-            print("Phue exception")
+# Hue color configs
 
 HUE_RED     = 0.0 / 6.0
 HUE_YELLOW  = 1.0 / 6.0
