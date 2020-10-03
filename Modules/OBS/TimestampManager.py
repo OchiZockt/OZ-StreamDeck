@@ -7,8 +7,8 @@ class TimestampManager:
     def __init__(self, directory):
         self._timestamps = {
             "Record": TS(os.path.join(directory, "record")),
-            "StrRec": TS(),
-            "Stream": TS(os.path.join(directory, "stream")),
+            "StrRec": TS(os.path.join(directory, "stream")),
+            "Stream": TS(),
             "Episode": TS()
         }
     
