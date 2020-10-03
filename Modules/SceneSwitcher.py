@@ -4,8 +4,9 @@ from Deck.Module import Module
 from Messages.OBS import *
 
 class SceneSwitcher(Module):
-    def __init__(self):
+    def __init__(self, timestamp_manager):
         super().__init__(bg_color = "#111111")
+        self._timestamp_manager = timestamp_manager
         
         self._sbs = False
         
@@ -38,6 +39,7 @@ class SceneSwitchButton(Button):
         if self._module._sbs and self._has_sbs_variant:
             scene_name = scene_name + " SBS"
         self.send_to_backend(SwitchSceneCommand(scene_name))
+        self._module._timestamp_manager.mark_all(scene_name)
 
 class SBSToggleButton(Button):
     def __init__(self, module):

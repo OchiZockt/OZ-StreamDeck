@@ -15,7 +15,7 @@ class Primary(Module):
         
         self._timestamp_manager = TimestampManager("/mnt/rec")
         
-        self.add_module(0, 0, SceneSwitcher())
+        self.add_module(0, 0, SceneSwitcher(self._timestamp_manager))
         self.add_module(0, 4, MusicControls())
         self.add_module(2, 4, LightControls())
         self.add_module(0, 3, RecordControls(self._timestamp_manager))
