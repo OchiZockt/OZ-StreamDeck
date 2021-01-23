@@ -13,6 +13,8 @@ manager = Manager()
 streamdeckxl = manager.device("CL44I1A01786")
 if streamdeckxl is not None:
     streamdeckxl.set_root_module(StreamDeckXL())
+else:
+    print("Error: StreamDeckXL not found.")
 
 try:
     manager.run()

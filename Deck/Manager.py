@@ -93,7 +93,7 @@ class Manager:
                         elif target == BACKEND:
                             self._backend.route(target, msg)
                     except Exception as e:
-                        print("Exception while processing message:\n\n" + str(e) + "\n")
+                        print("Exception while processing message:\n\n" + str(e) + "\n" + "Message was:\n\n" + msg)
             except:
                 pass
         print("Message queue stopped.")

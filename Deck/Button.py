@@ -11,6 +11,7 @@ class Button(Item):
         self._border_size = border_size
         self._border_color = border_color
         self._dirty = True
+        self._font = ImageFont.truetype("/usr/share/fonts/TTF/DejaVuSansMono-Bold.ttf", self._font_size)
 
     def dirty(self):
         return self._dirty
@@ -36,12 +37,10 @@ class Button(Item):
         
         draw.rectangle([(0, 0), (width-1, height-1)], fill = self.bg_color())
         
-        font = ImageFont.truetype("/usr/share/fonts/TTF/DejaVuSansMono-Bold.ttf", self._font_size)
-        
         text = self.text()
-        label_w, label_h = draw.textsize(text, font = font)
+        label_w, label_h = draw.textsize(text, font = self._font)
         label_pos = ((width - label_w) // 2, (height // 2) - (label_h // 2))
-        draw.text(label_pos, text = text, fill = self.fg_color(), font = font, align = "center")
+        draw.text(label_pos, text = text, fill = self.fg_color(), font = self._font, align = "center")
         
         if self.border_size() > 0:
             draw.rectangle([(0, 0), (width-1, height-1)], outline = self.border_color(), width = self.border_size())

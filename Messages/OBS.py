@@ -13,3 +13,6 @@ class StartStopCommand(OBSMessage):
 
 class SplitCommand(OBSMessage):
     pass
+
+class SwitchABCommand(OBSMessage):
+    pass

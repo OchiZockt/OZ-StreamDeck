@@ -66,7 +66,8 @@ CONFIG_ROOM_BRIGHT = [
 CONFIG_ROOM_DIMMED = [
     (FACE_L, LightOffPreset()),
     (FACE_R, LightOffPreset()),
-    (L1+L2+L3+L4+R1+R2+R3+R4, LightTempPreset(bri = 0.5, temp = ROOM_WHITE_TEMP))
+    #(L1+L2+L3+L4+R1+R2+R3+R4, LightTempPreset(bri = 0.1, temp = ROOM_WHITE_TEMP))
+    (L1+L2+L3+L4+R1+R2+R3+R4, LightOffPreset())
 ]
 
 CONFIG_ROOM_OFF = [

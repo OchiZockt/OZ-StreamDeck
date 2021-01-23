@@ -1,6 +1,7 @@
 from Deck.Connector import Connector
 from Messages.OBS import *
 
+from functools import partial
 import obswebsocket, obswebsocket.requests, obswebsocket.events, obswebsocket.exceptions
 
 class OBSConnector(Connector):
@@ -27,20 +28,32 @@ class OBSConnector(Connector):
                     self.set_recording(msg.running)
                 elif msg.ctl_kind == "stream":
                     self.set_streaming(msg.running)
+        
+        elif isinstance(msg, SwitchABCommand):
+            current_scene = self.current_scene_name()
+            current_scene_type = current_scene.split(" ")[0]
+            if current_scene_type in ["Cam", "Game"]:
+                current_scene = current_scene.replace("A", "X")
+                current_scene = current_scene.replace("B", "Y")
+                current_scene = current_scene.replace("X", "B")
+                current_scene = current_scene.replace("Y", "A")
+                self.switch_scene(current_scene)
     
     @staticmethod
-    def on_event(message):
+    def on_event(self, message):
         pass
     
     @staticmethod
-    def on_switch(message):
-        pass
+    def on_switch(self, message):
+        if "scene-name" in message.datain:
+            self.send_to_frontend(SwitchSceneCommand(message.datain["scene-name"]))
     
     def ensure_connection(self):
         if self.obs is not None:
             return True
         
         self.obs = obswebsocket.obsws(self.ip, self.port)
+        self.obs.register(partial(self.on_switch, self), obswebsocket.events.SwitchScenes)
         try:
             self.obs.connect()
             print("OBS connected")
@@ -64,7 +77,23 @@ class OBSConnector(Connector):
             self.obs = None
             return None
     
+    def current_scene_name(self):
+        return self.call(obswebsocket.requests.GetCurrentScene())["name"]
+    
     def switch_scene(self, scene_name):
+        current_scene = self.current_scene_name()
+        
+        if current_scene == scene_name:
+            return
+        
+        current_scene_type = current_scene.split(" ")[0]
+        next_scene_type = scene_name.split(" ")[0]
+        
+        if current_scene_type != next_scene_type:
+            self.call(obswebsocket.requests.SetCurrentTransition("Stinger Short"))
+        else:
+            self.call(obswebsocket.requests.SetCurrentTransition("Fade"))
+        
         self.call(obswebsocket.requests.SetCurrentScene(scene_name))
     
     def get_status(self):
